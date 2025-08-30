@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Official Slug Purity Test - UCSC</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5dc;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><g opacity="0.03" fill="%23003c6c"><path d="M20 30c15 0 25 10 30 20 5-10 15-20 30-20 10 0 15 5 15 15 0 20-20 35-45 35S5 65 5 45c0-10 5-15 15-15z"/><circle cx="15" cy="25" r="2"/><circle cx="25" cy="22" r="1.5"/></g></svg>');
+            background-repeat: repeat;
+            background-size: 120px 120px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 2rem auto;
+            background-color: #fdf6e3;
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .header::before,
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            width: 30%;
+            height: 2px;
+            background-color: #333;
+        }
+
+        .header::before {
+            left: 0;
+        }
+
+        .header::after {
+            right: 0;
+        }
+
+        .official-text {
+            color: #dc143c;
+            font-style: italic;
+            font-size: 1.1rem;
+            transform: rotate(-8deg);
+            display: inline-block;
+            margin-bottom: 0.5rem;
+        }
+
+        .main-title {
+            color: #000;
+            font-weight: bold;
+            font-size: 2.2rem;
+            margin: 0.5rem 0;
+        }
+
+        .subtitle {
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 1rem;
+        }
+
+        .description {
+            text-align: center;
+            line-height: 1.6;
+            margin: 2rem 0;
+            font-size: 1rem;
+        }
+
+        .warning {
+            font-weight: bold;
+            margin: 1rem 0;
+        }
+
+        .questions-container {
+            margin: 2rem 0;
+        }
+
+        .question-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .question-item {
+            display: flex;
+            align-items: flex-start;
+            margin: 1rem 0;
+            padding: 0.5rem 0;
+        }
+
+        .question-item:last-child {
+            border-bottom: none;
+        }
+
+        .question-checkbox {
+            margin-right: 1rem;
+            transform: scale(1.2);
+            flex-shrink: 0;
+        }
+
+        .question-number {
+            font-weight: bold;
+            color: #003c6c;
+            margin-right: 0.5rem;
+            min-width: 30px;
+            flex-shrink: 0;
+        }
+
+        .question-text {
+            flex: 1;
+            line-height: 1.4;
+        }
+
+        .score-section {
+            text-align: center;
+            margin: 2rem 0;
+            padding: 2rem;
+            background-color: #f0f8ff;
+            border-radius: 8px;
+            border: 2px solid #003c6c;
+        }
+
+        .calculate-btn {
+            background-color: #003c6c;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            font-family: Georgia, serif;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .calculate-btn:hover {
+            background-color: #002a4a;
+        }
+
+        .score-display {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #003c6c;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .main-title {
+                font-size: 1.8rem;
+            }
+
+            .header::before,
+            .header::after {
+                width: 20%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="official-text">The Official</div>
+            <h1 class="main-title">Slug Purity Test</h1>
+            <div class="subtitle">Have you ever...</div>
+        </div>
+
+        <div class="description">
+            <p>The Slug Purity Test - a way for slugs to bond and track their experiences at UCSC.</p>
+            <p>Whether you just wrapped up welcome week or transferred out to UCSD - reflect on your Santa Cruz journey and the unique experiences that make up college life.</p>
+            <p><em>This website does not condone any illegal activities.</em></p>
+            <p class="warning">Caution: This is not a bucket list. Completing all the items on this list means you should sit on the beach and reflect upon your actions.</p>
+            <p>Check every item you have done, and your purity score will be calculated at the end.</p>
+        </div>
+
+        <div class="questions-container">
+            <form id="purityForm">
+                <ul class="question-list">
+                    <li class="question-item">
+                        <input type="checkbox" id="q1" name="question1" class="question-checkbox">
+                        <span class="question-number">1.</span>
+                        <label for="q1" class="question-text">Got lost in the woods?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q2" name="question2" class="question-checkbox">
+                        <span class="question-number">2.</span>
+                        <label for="q2" class="question-text">Spotted a banana slug?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q3" name="question3" class="question-checkbox">
+                        <span class="question-number">3.</span>
+                        <label for="q3" class="question-text">Stepped on a banana slug?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q4" name="question4" class="question-checkbox">
+                        <span class="question-number">4.</span>
+                        <label for="q4" class="question-text">Saw Sammy the Slug?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q5" name="question5" class="question-checkbox">
+                        <span class="question-number">5.</span>
+                        <label for="q5" class="question-text">Walked up from base of campus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q6" name="question6" class="question-checkbox">
+                        <span class="question-number">6.</span>
+                        <label for="q6" class="question-text">Walked 1+ miles to class?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q7" name="question7" class="question-checkbox">
+                        <span class="question-number">7.</span>
+                        <label for="q7" class="question-text">Watched the sunset?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q8" name="question8" class="question-checkbox">
+                        <span class="question-number">8.</span>
+                        <label for="q8" class="question-text">Watched the sunrise?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q9" name="question9" class="question-checkbox">
+                        <span class="question-number">9.</span>
+                        <label for="q9" class="question-text">Chased by animals?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q10" name="question10" class="question-checkbox">
+                        <span class="question-number">10.</span>
+                        <label for="q10" class="question-text">Stargazed?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q11" name="question11" class="question-checkbox">
+                        <span class="question-number">11.</span>
+                        <label for="q11" class="question-text">Rode the loop bus all the way around?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q12" name="question12" class="question-checkbox">
+                        <span class="question-number">12.</span>
+                        <label for="q12" class="question-text">Missed the last bus to campus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q13" name="question13" class="question-checkbox">
+                        <span class="question-number">13.</span>
+                        <label for="q13" class="question-text">Waited 30+ minutes for the bus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q14" name="question14" class="question-checkbox">
+                        <span class="question-number">14.</span>
+                        <label for="q14" class="question-text">Fell on the bus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q15" name="question15" class="question-checkbox">
+                        <span class="question-number">15.</span>
+                        <label for="q15" class="question-text">Thanked the bus driver?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q16" name="question16" class="question-checkbox">
+                        <span class="question-number">16.</span>
+                        <label for="q16" class="question-text">Hate TAPS?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q17" name="question17" class="question-checkbox">
+                        <span class="question-number">17.</span>
+                        <label for="q17" class="question-text">Used a Zipcar?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q18" name="question18" class="question-checkbox">
+                        <span class="question-number">18.</span>
+                        <label for="q18" class="question-text">Used a BCycle?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q19" name="question19" class="question-checkbox">
+                        <span class="question-number">19.</span>
+                        <label for="q19" class="question-text">Ate cereal for dinner?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q20" name="question20" class="question-checkbox">
+                        <span class="question-number">20.</span>
+                        <label for="q20" class="question-text">Took more than one fruit or dessert?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q21" name="question21" class="question-checkbox">
+                        <span class="question-number">21.</span>
+                        <label for="q21" class="question-text">Ate at every dining hall?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q22" name="question22" class="question-checkbox">
+                        <span class="question-number">22.</span>
+                        <label for="q22" class="question-text">Pulled an all-nighter at rec lounge?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q23" name="question23" class="question-checkbox">
+                        <span class="question-number">23.</span>
+                        <label for="q23" class="question-text">Had your laundry stolen?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q24" name="question24" class="question-checkbox">
+                        <span class="question-number">24.</span>
+                        <label for="q24" class="question-text">Got locked out of your dorm?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q25" name="question25" class="question-checkbox">
+                        <span class="question-number">25.</span>
+                        <label for="q25" class="question-text">Get kicked out of a study room?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q26" name="question26" class="question-checkbox">
+                        <span class="question-number">26.</span>
+                        <label for="q26" class="question-text">Shopping spree at Merrill Market?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q27" name="question27" class="question-checkbox">
+                        <span class="question-number">27.</span>
+                        <label for="q27" class="question-text">Steal dining hall silverware?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q28" name="question28" class="question-checkbox">
+                        <span class="question-number">28.</span>
+                        <label for="q28" class="question-text">Moved someone's laundry?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q29" name="question29" class="question-checkbox">
+                        <span class="question-number">29.</span>
+                        <label for="q29" class="question-text">Hit your head on the ceiling?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q30" name="question30" class="question-checkbox">
+                        <span class="question-number">30.</span>
+                        <label for="q30" class="question-text">Experienced power outage?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q31" name="question31" class="question-checkbox">
+                        <span class="question-number">31.</span>
+                        <label for="q31" class="question-text">Slept during lecture?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q32" name="question32" class="question-checkbox">
+                        <span class="question-number">32.</span>
+                        <label for="q32" class="question-text">Skipped class?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q33" name="question33" class="question-checkbox">
+                        <span class="question-number">33.</span>
+                        <label for="q33" class="question-text">Forgot a test?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q34" name="question34" class="question-checkbox">
+                        <span class="question-number">34.</span>
+                        <label for="q34" class="question-text">Own a Pizza My Heart shirt?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q35" name="question35" class="question-checkbox">
+                        <span class="question-number">35.</span>
+                        <label for="q35" class="question-text">12 am Taco Bell runs?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q36" name="question36" class="question-checkbox">
+                        <span class="question-number">36.</span>
+                        <label for="q36" class="question-text">Ate the allergen-free halal chicken?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q37" name="question37" class="question-checkbox">
+                        <span class="question-number">37.</span>
+                        <label for="q37" class="question-text">Got all the free stuff from Cornucopia?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q38" name="question38" class="question-checkbox">
+                        <span class="question-number">38.</span>
+                        <label for="q38" class="question-text">Been to Oakes Cafe?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q39" name="question39" class="question-checkbox">
+                        <span class="question-number">39.</span>
+                        <label for="q39" class="question-text">Been to Banana Joe's?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q40" name="question40" class="question-checkbox">
+                        <span class="question-number">40.</span>
+                        <label for="q40" class="question-text">Been to Stevenson Coffee House?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q41" name="question41" class="question-checkbox">
+                        <span class="question-number">41.</span>
+                        <label for="q41" class="question-text">Been to Owl's Nest?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q42" name="question42" class="question-checkbox">
+                        <span class="question-number">42.</span>
+                        <label for="q42" class="question-text">University Center Bistro?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q43" name="question43" class="question-checkbox">
+                        <span class="question-number">43.</span>
+                        <label for="q43" class="question-text">Costco run?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q44" name="question44" class="question-checkbox">
+                        <span class="question-number">44.</span>
+                        <label for="q44" class="question-text">Trader Joe's run?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q45" name="question45" class="question-checkbox">
+                        <span class="question-number">45.</span>
+                        <label for="q45" class="question-text">Had Pacific Cookie?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q46" name="question46" class="question-checkbox">
+                        <span class="question-number">46.</span>
+                        <label for="q46" class="question-text">Gone thrifting?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q47" name="question47" class="question-checkbox">
+                        <span class="question-number">47.</span>
+                        <label for="q47" class="question-text">Naked run?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q48" name="question48" class="question-checkbox">
+                        <span class="question-number">48.</span>
+                        <label for="q48" class="question-text">Went to the welcome week rave?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q49" name="question49" class="question-checkbox">
+                        <span class="question-number">49.</span>
+                        <label for="q49" class="question-text">Got kicked out?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q50" name="question50" class="question-checkbox">
+                        <span class="question-number">50.</span>
+                        <label for="q50" class="question-text">Kicked someone out?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q51" name="question51" class="question-checkbox">
+                        <span class="question-number">51.</span>
+                        <label for="q51" class="question-text">Partied at the Catalyst?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q52" name="question52" class="question-checkbox">
+                        <span class="question-number">52.</span>
+                        <label for="q52" class="question-text">Frat party?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q53" name="question53" class="question-checkbox">
+                        <span class="question-number">53.</span>
+                        <label for="q53" class="question-text">Ski and Snow Party?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q54" name="question54" class="question-checkbox">
+                        <span class="question-number">54.</span>
+                        <label for="q54" class="question-text">Porno Party?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q55" name="question55" class="question-checkbox">
+                        <span class="question-number">55.</span>
+                        <label for="q55" class="question-text">Applied for transfer?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q56" name="question56" class="question-checkbox">
+                        <span class="question-number">56.</span>
+                        <label for="q56" class="question-text">Transferring?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q57" name="question57" class="question-checkbox">
+                        <span class="question-number">57.</span>
+                        <label for="q57" class="question-text">Featured on @stephenlouismarino?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q58" name="question58" class="question-checkbox">
+                        <span class="question-number">58.</span>
+                        <label for="q58" class="question-text">Participated in intramural sports?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q59" name="question59" class="question-checkbox">
+                        <span class="question-number">59.</span>
+                        <label for="q59" class="question-text">Rushing for a frat?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q60" name="question60" class="question-checkbox">
+                        <span class="question-number">60.</span>
+                        <label for="q60" class="question-text">Got written up?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q61" name="question61" class="question-checkbox">
+                        <span class="question-number">61.</span>
+                        <label for="q61" class="question-text">Got a warning?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q62" name="question62" class="question-checkbox">
+                        <span class="question-number">62.</span>
+                        <label for="q62" class="question-text">Hate someone on your floor?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q63" name="question63" class="question-checkbox">
+                        <span class="question-number">63.</span>
+                        <label for="q63" class="question-text">Hate your roommate?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q64" name="question64" class="question-checkbox">
+                        <span class="question-number">64.</span>
+                        <label for="q64" class="question-text">Pool at TFC or Stevenson?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q65" name="question65" class="question-checkbox">
+                        <span class="question-number">65.</span>
+                        <label for="q65" class="question-text">Poker night?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q66" name="question66" class="question-checkbox">
+                        <span class="question-number">66.</span>
+                        <label for="q66" class="question-text">Injured/get injured playing a sport?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q67" name="question67" class="question-checkbox">
+                        <span class="question-number">67.</span>
+                        <label for="q67" class="question-text">Hosted a dorm party?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q68" name="question68" class="question-checkbox">
+                        <span class="question-number">68.</span>
+                        <label for="q68" class="question-text">Been to a dorm party?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q69" name="question69" class="question-checkbox">
+                        <span class="question-number">69.</span>
+                        <label for="q69" class="question-text">Shrooms?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q70" name="question70" class="question-checkbox">
+                        <span class="question-number">70.</span>
+                        <label for="q70" class="question-text">Sober at Porter Meadows on 4/20?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q71" name="question71" class="question-checkbox">
+                        <span class="question-number">71.</span>
+                        <label for="q71" class="question-text">Smoked at Porter Meadows on 4/20?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q72" name="question72" class="question-checkbox">
+                        <span class="question-number">72.</span>
+                        <label for="q72" class="question-text">Smoked weed?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q73" name="question73" class="question-checkbox">
+                        <span class="question-number">73.</span>
+                        <label for="q73" class="question-text">Greened out?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q74" name="question74" class="question-checkbox">
+                        <span class="question-number">74.</span>
+                        <label for="q74" class="question-text">Blacked out?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q75" name="question75" class="question-checkbox">
+                        <span class="question-number">75.</span>
+                        <label for="q75" class="question-text">Used a fake?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q76" name="question76" class="question-checkbox">
+                        <span class="question-number">76.</span>
+                        <label for="q76" class="question-text">Denied with a fake?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q77" name="question77" class="question-checkbox">
+                        <span class="question-number">77.</span>
+                        <label for="q77" class="question-text">Got Narcan on campus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q78" name="question78" class="question-checkbox">
+                        <span class="question-number">78.</span>
+                        <label for="q78" class="question-text">Got fent test strips on campus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q79" name="question79" class="question-checkbox">
+                        <span class="question-number">79.</span>
+                        <label for="q79" class="question-text">Had a crush on your TA?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q80" name="question80" class="question-checkbox">
+                        <span class="question-number">80.</span>
+                        <label for="q80" class="question-text">Had a crush on your RA?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q81" name="question81" class="question-checkbox">
+                        <span class="question-number">81.</span>
+                        <label for="q81" class="question-text">Situationship?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q82" name="question82" class="question-checkbox">
+                        <span class="question-number">82.</span>
+                        <label for="q82" class="question-text">Got Tinder?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q83" name="question83" class="question-checkbox">
+                        <span class="question-number">83.</span>
+                        <label for="q83" class="question-text">Got Hinge?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q84" name="question84" class="question-checkbox">
+                        <span class="question-number">84.</span>
+                        <label for="q84" class="question-text">Attended a protest?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q85" name="question85" class="question-checkbox">
+                        <span class="question-number">85.</span>
+                        <label for="q85" class="question-text">Came late because of a protest?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q86" name="question86" class="question-checkbox">
+                        <span class="question-number">86.</span>
+                        <label for="q86" class="question-text">Pass/Failed a class?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q87" name="question87" class="question-checkbox">
+                        <span class="question-number">87.</span>
+                        <label for="q87" class="question-text">Gave a professor a bad rating?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q88" name="question88" class="question-checkbox">
+                        <span class="question-number">88.</span>
+                        <label for="q88" class="question-text">Barun Dhar?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q89" name="question89" class="question-checkbox">
+                        <span class="question-number">89.</span>
+                        <label for="q89" class="question-text">Attended a club meeting in E2-180?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q90" name="question90" class="question-checkbox">
+                        <span class="question-number">90.</span>
+                        <label for="q90" class="question-text">Got caught cheating in class?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q91" name="question91" class="question-checkbox">
+                        <span class="question-number">91.</span>
+                        <label for="q91" class="question-text">Use ChatGPT?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q92" name="question92" class="question-checkbox">
+                        <span class="question-number">92.</span>
+                        <label for="q92" class="question-text">Saw a Snapchat micro celebrity?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q93" name="question93" class="question-checkbox">
+                        <span class="question-number">93.</span>
+                        <label for="q93" class="question-text">Waited 30+ minutes in the gym line?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q94" name="question94" class="question-checkbox">
+                        <span class="question-number">94.</span>
+                        <label for="q94" class="question-text">Been to the Boardwalk?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q95" name="question95" class="question-checkbox">
+                        <span class="question-number">95.</span>
+                        <label for="q95" class="question-text">Got a condom on campus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q96" name="question96" class="question-checkbox">
+                        <span class="question-number">96.</span>
+                        <label for="q96" class="question-text">Visited the coastal campus?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q97" name="question97" class="question-checkbox">
+                        <span class="question-number">97.</span>
+                        <label for="q97" class="question-text">Rode the Giant Dipper?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q98" name="question97" class="question-checkbox">
+                        <span class="question-number">98.</span>
+                        <label for="q98" class="question-text">Heard the Land Acknowledgment?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q99" name="question98" class="question-checkbox">
+                        <span class="question-number">99.</span>
+                        <label for="q99" class="question-text">Beach bonfire?</label>
+                    </li>
+                    <li class="question-item">
+                        <input type="checkbox" id="q100" name="question99" class="question-checkbox">
+                        <span class="question-number">100.</span>
+                        <label for="q100" class="question-text">Sneak into a lecture hall?</label>
+                    </li>
+                </ul>
+            </form>
+        </div>
+
+        <div class="score-section">
+            <button type="button" class="calculate-btn" onclick="calculateScore()">Calculate My Purity Score</button>
+            <div id="scoreResult" class="score-display"></div>
+        </div>
+    </div>
+
+    <script>
+        // Store responses for analysis (in a real implementation, this would send to a backend)
+        let responses = [];
+
+        async function calculateScore() {
+            const form = document.getElementById('purityForm');
+            const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+            const totalQuestions = checkboxes.length;
+            let checkedCount = 0;
+
+            // Count checked items and store responses
+            responses = [];
+            checkboxes.forEach((checkbox, index) => {
+                const isChecked = checkbox.checked;
+                responses.push({
+                    questionNumber: index + 1,
+                    answered: isChecked,
+                    timestamp: new Date().toISOString()
+                });
+                
+                if (isChecked) {
+                    checkedCount++;
+                }
+            });
+            // Determine message based on score
+            let message = '';
+            if (checkedCount === 0) {
+                message = "You don't go to UCSC...";
+            } else if (checkedCount <= 10) {
+                message = "Frosh.";
+            } else if (checkedCount <= 30) {
+                message = "You've been here a couple quarters...";
+            } else if (checkedCount <= 60) {
+                message = "Dean's List.";
+            } else {
+                message = "Yikes. You know there are student resources for help, right?";
+            }
+            // Calculate purity score (higher score = more "pure")
+            const purityScore = Math.round(((totalQuestions - checkedCount) / totalQuestions) * 100);
+            
+            // Display result
+            const scoreElement = document.getElementById('scoreResult');
+            scoreElement.innerHTML = `
+                <div>Your Purity Score: ${purityScore}%</div>
+                <div>${message}</div>
+                <div style="font-size: 1rem; margin-top: 0.5rem; font-weight: normal;">
+                    You've experienced ${checkedCount} out of ${totalQuestions} items.
+                </div>
+            `;
+            scoreElement.style.display = 'block';
+            // Scroll to results
+            scoreElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Allow clicking on question text to toggle checkbox
+        document.querySelectorAll('.question-text').forEach(label => {
+            label.style.cursor = 'pointer';
+        });
+    </script>
+</body>
+</html>

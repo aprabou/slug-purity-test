@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Results - Slug Purity Test Analytics</title>
+    <style>
+        body {
+            font-family: Georgia, serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5dc;
+            background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100"><g opacity="0.03" fill="%23003c6c"><path d="M20 30c15 0 25 10 30 20 5-10 15-20 30-20 10 0 15 5 15 15 0 20-20 35-45 35S5 65 5 45c0-10 5-15 15-15z"/><circle cx="15" cy="25" r="2"/><circle cx="25" cy="22" r="1.5"/></g></svg>');
+            background-repeat: repeat;
+            background-size: 120px 120px;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            background-color: #fdf6e3;
+            border-radius: 12px;
+            padding: 3rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .main-title {
+            color: #003c6c;
+            font-weight: bold;
+            font-size: 2.5rem;
+            margin: 0.5rem 0;
+        }
+
+        .subtitle {
+            font-style: italic;
+            font-size: 1.2rem;
+            color: #333;
+            margin-top: 1rem;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .stat-card {
+            background-color: #f0f8ff;
+            border: 2px solid #003c6c;
+            border-radius: 8px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #003c6c;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 2rem 0;
+            background-color: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .results-table th {
+            background-color: #003c6c;
+            color: white;
+            font-weight: bold;
+        }
+
+        .results-table tr:hover {
+            background-color: #f5f5f5;
+        }
+
+        .percentage-bar {
+            background-color: #e0e0e0;
+            border-radius: 10px;
+            height: 20px;
+            width: 100px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .percentage-fill {
+            background-color: #003c6c;
+            height: 100%;
+            border-radius: 10px;
+            transition: width 0.3s ease;
+        }
+
+        .question-text {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .navigation {
+            text-align: center;
+            margin: 2rem 0;
+        }
+
+        .button {
+            display: inline-block;
+            background-color: #003c6c;
+            color: white;
+            padding: 12px 30px;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 1.1rem;
+            transition: background-color 0.3s;
+            margin: 0 10px;
+        }
+
+        .button:hover {
+            background-color: #002a4a;
+        }
+
+        .sort-controls {
+            margin: 1rem 0;
+            text-align: center;
+        }
+
+        .sort-btn {
+            background-color: #666;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            margin: 0 5px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .sort-btn:hover {
+            background-color: #555;
+        }
+
+        .sort-btn.active {
+            background-color: #003c6c;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                margin: 1rem;
+                padding: 2rem 1.5rem;
+            }
+
+            .main-title {
+                font-size: 2rem;
+            }
+
+            .results-table {
+                font-size: 0.9rem;
+            }
+
+            .percentage-bar {
+                width: 80px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="main-title">📊 Slug Purity Test Results</h1>
+            <div class="subtitle">Anonymous Response Analytics</div>
+        </div>
+
+        <div class="stats-summary">
+            <div class="stat-card">
+                <div class="stat-number">{{ total_submissions }}</div>
+                <div class="stat-label">Total Submissions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">100</div>
+                <div class="stat-label">Total Questions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="avgYesCount">-</div>
+                <div class="stat-label">Avg "Yes" per Person</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="mostPopular">-</div>
+                <div class="stat-label">Most Popular Question</div>
+            </div>
+        </div>
+
+        <div class="sort-controls">
+            <button class="sort-btn active" onclick="sortTable('question')">Sort by Question #</button>
+            <button class="sort-btn" onclick="sortTable('percentage')">Sort by Percentage</button>
+        </div>
+
+        <table class="results-table" id="resultsTable">
+            <thead>
+                <tr>
+                    <th>Question #</th>
+                    <th>Question Text</th>
+                    <th>Yes Count</th>
+                    <th>Percentage</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set questions = [
+                    "Got lost in the woods?",
+                    "Spotted a banana slug?",
+                    "Stepped on a banana slug?",
+                    "Saw Sammy the Slug?",
+                    "Walked up from base of campus?",
+                    "Walked 1+ miles to class?",
+                    "Watched the sunset?",
+                    "Watched the sunrise?",
+                    "Chased by animals?",
+                    "Stargazed?",
+                    "Rode the loop bus all the way around?",
+                    "Missed the last bus to campus?",
+                    "Waited 30+ minutes for the bus?",
+                    "Fell on the bus?",
+                    "Thanked the bus driver?",
+                    "Hate TAPS?",
+                    "Used a Zipcar?",
+                    "Used a BCycle?",
+                    "Ate cereal for dinner?",
+                    "Took more than one fruit or dessert?",
+                    "Ate at every dining hall?",
+                    "Pulled an all-nighter at rec lounge?",
+                    "Had your laundry stolen?",
+                    "Got locked out of your dorm?",
+                    "Get kicked out of a study room?",
+                    "Shopping spree at Merrill Market?",
+                    "Steal dining hall silverware?",
+                    "Moved someone's laundry?",
+                    "Hit your head on the ceiling?",
+                    "Experienced power outage?",
+                    "Slept during lecture?",
+                    "Skipped class?",
+                    "Forgot a test?",
+                    "Own a Pizza My Heart shirt?",
+                    "12 am Taco Bell runs?",
+                    "Ate the allergen-free halal chicken?",
+                    "Got all the free stuff from Cornucopia?",
+                    "Been to Oakes Cafe?",
+                    "Been to Banana Joe's?",
+                    "Been to Stevenson Coffee House?",
+                    "Been to Owl's Nest?",
+                    "University Center Bistro?",
+                    "Costco run?",
+                    "Trader Joe's run?",
+                    "Had Pacific Cookie?",
+                    "Gone thrifting?",
+                    "Naked run?",
+                    "Went to the welcome week rave?",
+                    "Got kicked out?",
+                    "Kicked someone out?",
+                    "Partied at the Catalyst?",
+                    "Frat party?",
+                    "Ski and Snow Party?",
+                    "Porno Party?",
+                    "Applied for transfer?",
+                    "Transferring?",
+                    "Featured on @stephenlouismarino?",
+                    "Participated in intramural sports?",
+                    "Rushing for a frat?",
+                    "Got written up?",
+                    "Got a warning?",
+                    "Hate someone on your floor?",
+                    "Hate your roommate?",
+                    "Pool at TFC or Stevenson?",
+                    "Poker night?",
+                    "Injured/get injured playing a sport?",
+                    "Hosted a dorm party?",
+                    "Been to a dorm party?",
+                    "Shrooms?",
+                    "Sober at Porter Meadows on 4/20?",
+                    "Smoked at Porter Meadows on 4/20?",
+                    "Smoked weed?",
+                    "Greened out?",
+                    "Blacked out?",
+                    "Used a fake?",
+                    "Denied with a fake?",
+                    "Got Narcan on campus?",
+                    "Got fent test strips on campus?",
+                    "Had a crush on your TA?",
+                    "Had a crush on your RA?",
+                    "Situationship?",
+                    "Got Tinder?",
+                    "Got Hinge?",
+                    "Attended a protest?",
+                    "Came late because of a protest?",
+                    "Pass/Failed a class?",
+                    "Gave a professor a bad rating?",
+                    "Barun Dhar?",
+                    "Attended a club meeting in E2-180?",
+                    "Got caught cheating in class?",
+                    "Use ChatGPT?",
+                    "Saw a Snapchat micro celebrity?",
+                    "Waited 30+ minutes in the gym line?",
+                    "Been to the Boardwalk?",
+                    "Got a condom on campus?",
+                    "Visited the coastal campus?",
+                    "Rode the Giant Dipper?",
+                    "Heard the Land Acknowledgment?",
+                    "Beach bonfire?",
+                    "Sneak into a lecture hall?"
+                ] %}
+                
+                {% for question_id in range(1, 101) %}
+                    {% set yes_count = stats.get(question_id, 0) %}
+                    {% set percentage = (yes_count / total_submissions * 100) if total_submissions > 0 else 0 %}
+                    <tr data-question="{{ question_id }}" data-count="{{ yes_count }}" data-percentage="{{ percentage }}">
+                        <td>{{ question_id }}</td>
+                        <td class="question-text">{{ questions[question_id - 1] }}</td>
+                        <td>{{ yes_count }}</td>
+                        <td>{{ "%.1f"|format(percentage) }}%</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="navigation">
+            <a href="/" class="button">Take Test</a>
+            <a href="/api/results" class="button">API Data</a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Get data from template
+            const totalSubmissions = parseInt("{{ total_submissions }}", 10);
+            const stats = JSON.parse('{{ (stats or {}) | tojson | safe }}');
+            
+            // Calculate average yes count per person
+            const totalYesResponses = Object.values(stats).reduce((sum, count) => sum + count, 0);
+            const avgYesCount = totalSubmissions > 0 ? (totalYesResponses / totalSubmissions).toFixed(1) : 0;
+            document.getElementById('avgYesCount').textContent = avgYesCount;
+            
+            // Find most popular question
+            let maxCount = 0;
+            let mostPopularQuestion = '-';
+            for (const [questionId, count] of Object.entries(stats)) {
+                if (count > maxCount) {
+                    maxCount = count;
+                    mostPopularQuestion = `Q${questionId}`;
+                }
+            }
+            document.getElementById('mostPopular').textContent = mostPopularQuestion;
+        });
+
+        // Table sorting functionality
+        let currentSort = 'question';
+        
+        function sortTable(sortBy) {
+            const table = document.getElementById('resultsTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.querySelectorAll('tr'));
+            
+            // Update active button
+            document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            rows.sort((a, b) => {
+                let valueA, valueB;
+                
+                switch(sortBy) {
+                    case 'question':
+                        valueA = parseInt(a.dataset.question);
+                        valueB = parseInt(b.dataset.question);
+                        break;
+                    case 'popularity':
+                        valueA = parseInt(a.dataset.count);
+                        valueB = parseInt(b.dataset.count);
+                        return valueB - valueA; // Descending order
+                    case 'percentage':
+                        valueA = parseFloat(a.dataset.percentage);
+                        valueB = parseFloat(b.dataset.percentage);
+                        return valueB - valueA; // Descending order
+                }
+                
+                return valueA - valueB;
+            });
+            
+            // Re-append sorted rows
+            rows.forEach(row => tbody.appendChild(row));
+            currentSort = sortBy;
+        }
+    </script>
+</body>
+</html>
