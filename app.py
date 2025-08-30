@@ -5,15 +5,11 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-# Use environment variable for database path in production
-DATABASE = os.environ.get('DATABASE_URL', 'responses.db')
-# Handle PostgreSQL URLs if using Heroku Postgres
-if DATABASE.startswith('postgres://'):
-    DATABASE = DATABASE.replace('postgres://', 'postgresql://', 1)
+# Simple database path for Heroku
+DATABASE = 'responses.db'
 
 def init_db():
-    # For SQLite (simple deployment)
-    if not DATABASE.startswith('postgresql://'):
+    try:
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         
@@ -40,7 +36,11 @@ def init_db():
         
         conn.commit()
         conn.close()
-        print("SQLite database initialized successfully")
+        print("Database initialized successfully")
+        return True
+    except Exception as e:
+        print(f"Database initialization error: {e}")
+        return False
 
 @app.route('/')
 def index():
@@ -131,8 +131,8 @@ def api_results():
     })
 
 if __name__ == '__main__':
-    init_db()
-    # Use environment variables for production
-    port = int(os.environ.get('PORT', 3000))
-    debug = os.environ.get('FLASK_ENV', 'development') == 'development'
-    app.run(debug=debug, host='0.0.0.0', port=port)
+    if init_db():
+        port = int(os.environ.get('PORT', 5000))  # Heroku uses PORT env var
+        app.run(debug=False, host='0.0.0.0', port=port)  # Never debug=True in production
+    else:
+        print("Failed to initialize database")
