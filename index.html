@@ -10,9 +10,6 @@
             margin: 0;
             padding: 0;
             background-color: #f5f5dc;
-            background-image: url('/static/images/UCSC.png');
-            background-repeat: repeat;
-            background-size: 160px 120px;
             min-height: 100vh;
         }
 
@@ -122,6 +119,7 @@
         .question-text {
             flex: 1;
             line-height: 1.4;
+            cursor: pointer;
         }
 
         .score-section {
@@ -191,7 +189,7 @@
         </div>
 
         <div class="questions-container">
-            <form id="purityForm" action="/submit" method="POST">
+            <form id="purityForm">
                 <ul class="question-list">
                     <li class="question-item">
                         <input type="checkbox" id="q1" name="question1" class="question-checkbox">
@@ -698,26 +696,19 @@
         </div>
 
         <div class="score-section">
-            <button type="submit" class="calculate-btn" onclick="submitForm()">Submit My Responses</button>
+            <button type="button" class="calculate-btn" onclick="calculateAndShowScore()">Calculate My Score</button>
             <div id="scoreResult" class="score-display"></div>
         </div>
     </div>
 
     <script>
-        // Your Apps Script Web App URL
-        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznf8FIkCmlq5lqfyH5YmHQYSQGX8PFGrUsnZtoL7X78ABDlCqkspSp8gA91lyDGXyJ/exec';
-
-        // Store responses for local calculation (optional preview)
-        let responses = [];
-
         function calculateScore() {
             const form = document.getElementById('purityForm');
             const checkboxes = form.querySelectorAll('input[type="checkbox"]');
             const totalQuestions = checkboxes.length;
             let checkedCount = 0;
 
-            // Count checked items for preview
-            checkboxes.forEach((checkbox, index) => {
+            checkboxes.forEach((checkbox) => {
                 if (checkbox.checked) {
                     checkedCount++;
                 }
@@ -743,164 +734,33 @@
             return { purityScore, message, checkedCount, totalQuestions };
         }
 
-        // Add preview functionality (optional)
-        function previewScore() {
+        function calculateAndShowScore() {
             const result = calculateScore();
             const scoreElement = document.getElementById('scoreResult');
+            
             scoreElement.innerHTML = `
-                <div style="background-color: #e8f4f8; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-                    <div><strong>Preview:</strong> Your Purity Score: ${result.purityScore}%</div>
+                <div style="background-color: #d4edda; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #c3e6cb;">
+                    <div style="color: #155724;"><strong>Your Results</strong></div>
+                    <div style="margin-top: 0.5rem;"><strong>Your Purity Score: ${result.purityScore}%</strong></div>
                     <div>${result.message}</div>
                     <div style="font-size: 1rem; margin-top: 0.5rem; font-weight: normal;">
                         You've experienced ${result.checkedCount} out of ${result.totalQuestions} items.
                     </div>
-                    <div style="font-size: 0.9rem; margin-top: 0.5rem; color: #666; font-style: italic;">
-                        Click "Submit My Responses" to save your answers anonymously.
+                    <div style="margin-top: 1rem;">
+                        <button onclick="location.reload()" style="background-color: #003c6c; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Take Test Again</button>
                     </div>
                 </div>
             `;
+            
             scoreElement.style.display = 'block';
             scoreElement.scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Submit to server AND show score
-        async function submitFormAndShowScore() {
-            const form = document.getElementById('purityForm');
-            const formData = new FormData(form);
-            const scoreElement = document.getElementById('scoreResult'); // Define here
-            
-            try {
-                // Show loading state
-                scoreElement.innerHTML = `
-                    <div style="background-color: #f0f0f0; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-                        <div>Submitting your responses...</div>
-                    </div>
-                `;
-                scoreElement.style.display = 'block';
-                
-                // Submit to server
-                const response = await fetch('/submit', {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                console.log('Response status:', response.status); // Debug log
-                console.log('Response ok:', response.ok); // Debug log
-                
-                if (response.ok) {
-                    // Calculate local score for display
-                    const result = calculateScore();
-                    scoreElement.innerHTML = `
-                        <div style="background-color: #d4edda; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #c3e6cb;">
-                            <div style="color: #155724;"><strong>✅ Submitted Successfully!</strong></div>
-                            <div style="margin-top: 0.5rem;"><strong>Your Purity Score: ${result.purityScore}%</strong></div>
-                            <div>${result.message}</div>
-                            <div style="font-size: 1rem; margin-top: 0.5rem; font-weight: normal;">
-                                You've experienced ${result.checkedCount} out of ${result.totalQuestions} items.
-                            </div>
-                            <div style="margin-top: 1rem;">
-                                <a href="/" style="background-color: #003c6c; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px;">Take Test Again</a>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    // Handle non-200 responses
-                    const responseText = await response.text();
-                    console.log('Error response:', responseText); // Debug log
-                    throw new Error(`Server returned ${response.status}: ${responseText}`);
-                }
-                
-            } catch (error) {
-                console.error('Error submitting form:', error);
-                scoreElement.innerHTML = `
-                    <div style="background-color: #f8d7da; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #f5c6cb;">
-                        <div style="color: #721c24;"><strong>❌ Submission Error</strong></div>
-                        <div>Error: ${error.message}</div>
-                        <div style="margin-top: 0.5rem; font-size: 0.9rem;">Please try again or refresh the page.</div>
-                    </div>
-                `;
-            }
-            
-            scoreElement.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        async function submitToGoogleSheets() {
-            const scoreElement = document.getElementById('scoreResult');
-            
-            try {
-                scoreElement.innerHTML = `
-                    <div style="background-color: #f0f0f0; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-                        <div>Submitting your responses...</div>
-                    </div>
-                `;
-                scoreElement.style.display = 'block';
-                
-                // Calculate score and get responses
-                const result = calculateScore();
-                
-                // Get list of checked question numbers
-                const form = document.getElementById('purityForm');
-                const checkboxes = form.querySelectorAll('input[type="checkbox"]');
-                let checkedQuestions = [];
-                
-                checkboxes.forEach((checkbox, index) => {
-                    if (checkbox.checked) {
-                        checkedQuestions.push(index + 1); // Question numbers 1-100
-                    }
-                });
-                
-                // Submit to Google Sheets
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        responses: checkedQuestions,
-                        score: result.purityScore,
-                        checkedCount: result.checkedCount
-                    })
-                });
-                
-                if (response.ok) {
-                    scoreElement.innerHTML = `
-                        <div style="background-color: #d4edda; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #c3e6cb;">
-                            <div style="color: #155724;"><strong>✅ Submitted Successfully!</strong></div>
-                            <div style="margin-top: 0.5rem;"><strong>Your Purity Score: ${result.purityScore}%</strong></div>
-                            <div>${result.message}</div>
-                            <div style="font-size: 1rem; margin-top: 0.5rem; font-weight: normal;">
-                                You've experienced ${result.checkedCount} out of ${result.totalQuestions} items.
-                            </div>
-                            <div style="margin-top: 1rem;">
-                                <button onclick="location.reload()" style="background-color: #003c6c; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Take Test Again</button>
-                            </div>
-                        </div>
-                    `;
-                } else {
-                    throw new Error('Submission failed');
-                }
-                
-            } catch (error) {
-                console.error('Error submitting to Google Sheets:', error);
-                scoreElement.innerHTML = `
-                    <div style="background-color: #f8d7da; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
-                        <div style="color: #721c24;"><strong>❌ Submission Error</strong></div>
-                        <div>Please try again.</div>
-                    </div>
-                `;
-            }
-            
-            scoreElement.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        // Fix form submission
-        function submitForm() {
-            submitToGoogleSheets();
-        }
-
         // Allow clicking on question text to toggle checkbox
-        document.querySelectorAll('.question-text').forEach(label => {
-            label.style.cursor = 'pointer';
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.question-text').forEach(label => {
+                label.style.cursor = 'pointer';
+            });
         });
     </script>
 </body>
