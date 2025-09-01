@@ -704,6 +704,9 @@
     </div>
 
     <script>
+        // Your Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbznf8FIkCmlq5lqfyH5YmHQYSQGX8PFGrUsnZtoL7X78ABDlCqkspSp8gA91lyDGXyJ/exec';
+
         // Store responses for local calculation (optional preview)
         let responses = [];
 
@@ -821,9 +824,78 @@
             scoreElement.scrollIntoView({ behavior: 'smooth' });
         }
 
+        async function submitToGoogleSheets() {
+            const scoreElement = document.getElementById('scoreResult');
+            
+            try {
+                scoreElement.innerHTML = `
+                    <div style="background-color: #f0f0f0; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                        <div>Submitting your responses...</div>
+                    </div>
+                `;
+                scoreElement.style.display = 'block';
+                
+                // Calculate score and get responses
+                const result = calculateScore();
+                
+                // Get list of checked question numbers
+                const form = document.getElementById('purityForm');
+                const checkboxes = form.querySelectorAll('input[type="checkbox"]');
+                let checkedQuestions = [];
+                
+                checkboxes.forEach((checkbox, index) => {
+                    if (checkbox.checked) {
+                        checkedQuestions.push(index + 1); // Question numbers 1-100
+                    }
+                });
+                
+                // Submit to Google Sheets
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        responses: checkedQuestions,
+                        score: result.purityScore,
+                        checkedCount: result.checkedCount
+                    })
+                });
+                
+                if (response.ok) {
+                    scoreElement.innerHTML = `
+                        <div style="background-color: #d4edda; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #c3e6cb;">
+                            <div style="color: #155724;"><strong>✅ Submitted Successfully!</strong></div>
+                            <div style="margin-top: 0.5rem;"><strong>Your Purity Score: ${result.purityScore}%</strong></div>
+                            <div>${result.message}</div>
+                            <div style="font-size: 1rem; margin-top: 0.5rem; font-weight: normal;">
+                                You've experienced ${result.checkedCount} out of ${result.totalQuestions} items.
+                            </div>
+                            <div style="margin-top: 1rem;">
+                                <button onclick="location.reload()" style="background-color: #003c6c; color: white; padding: 8px 16px; border: none; border-radius: 4px; cursor: pointer;">Take Test Again</button>
+                            </div>
+                        </div>
+                    `;
+                } else {
+                    throw new Error('Submission failed');
+                }
+                
+            } catch (error) {
+                console.error('Error submitting to Google Sheets:', error);
+                scoreElement.innerHTML = `
+                    <div style="background-color: #f8d7da; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
+                        <div style="color: #721c24;"><strong>❌ Submission Error</strong></div>
+                        <div>Please try again.</div>
+                    </div>
+                `;
+            }
+            
+            scoreElement.scrollIntoView({ behavior: 'smooth' });
+        }
+
         // Fix form submission
         function submitForm() {
-            submitFormAndShowScore();
+            submitToGoogleSheets();
         }
 
         // Allow clicking on question text to toggle checkbox
