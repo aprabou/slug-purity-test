@@ -7,7 +7,7 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# Simple database setup for App Platform
+# Simple database setup
 DATABASE = 'responses.db'
 
 def init_db():
@@ -47,10 +47,12 @@ def init_db():
 
 @app.route('/')
 def index():
+    print("Index route accessed")  # Debug log
     return render_template('index.html')
 
 @app.route('/submit', methods=['POST'])
 def submit_responses():
+    print("Submit route accessed")  # Debug log
     try:
         print("Form data received:", dict(request.form))
         
@@ -80,11 +82,11 @@ def submit_responses():
         conn.close()
         
         print("Database updated successfully")
-        return {"status": "success"}, 200
+        return jsonify({"status": "success"})  # Return proper JSON
     
     except Exception as e:
         print(f"Error processing submission: {e}")
-        return {"status": "error", "message": str(e)}, 500
+        return jsonify({"status": "error", "message": str(e)}), 500
 
 @app.route('/results')
 def results():
@@ -136,11 +138,11 @@ def api_results():
     
     except Exception as e:
         print(f"Error getting API results: {e}")
-        return {"error": str(e)}, 500
+        return jsonify({"error": str(e)}), 500
 
 # Initialize database when app starts
 init_db()
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 8080))
-    app.run(debug=False, host='0.0.0.0', port=port)
+    port = int(os.environ.get('PORT', 5050))  # Use 5000 for local testing
+    app.run(debug=True, host='0.0.0.0', port=port)  # Enable debug for local testing

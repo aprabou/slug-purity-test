@@ -764,10 +764,10 @@
         async function submitFormAndShowScore() {
             const form = document.getElementById('purityForm');
             const formData = new FormData(form);
+            const scoreElement = document.getElementById('scoreResult'); // Define here
             
             try {
                 // Show loading state
-                const scoreElement = document.getElementById('scoreResult');
                 scoreElement.innerHTML = `
                     <div style="background-color: #f0f0f0; padding: 1rem; border-radius: 6px; margin-top: 1rem;">
                         <div>Submitting your responses...</div>
@@ -781,10 +781,15 @@
                     body: formData
                 });
                 
+                console.log('Response status:', response.status); // Debug log
+                console.log('Response ok:', response.ok); // Debug log
+                
                 if (response.ok) {
+                    // Calculate local score for display
                     const result = calculateScore();
                     scoreElement.innerHTML = `
-                        <div style="padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #c3e6cb;">
+                        <div style="background-color: #d4edda; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #c3e6cb;">
+                            <div style="color: #155724;"><strong>✅ Submitted Successfully!</strong></div>
                             <div style="margin-top: 0.5rem;"><strong>Your Purity Score: ${result.purityScore}%</strong></div>
                             <div>${result.message}</div>
                             <div style="font-size: 1rem; margin-top: 0.5rem; font-weight: normal;">
@@ -796,17 +801,19 @@
                         </div>
                     `;
                 } else {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || 'Submission failed');
+                    // Handle non-200 responses
+                    const responseText = await response.text();
+                    console.log('Error response:', responseText); // Debug log
+                    throw new Error(`Server returned ${response.status}: ${responseText}`);
                 }
                 
             } catch (error) {
                 console.error('Error submitting form:', error);
-                const scoreElement = document.getElementById('scoreResult');
                 scoreElement.innerHTML = `
                     <div style="background-color: #f8d7da; padding: 1rem; border-radius: 6px; margin-top: 1rem; border: 1px solid #f5c6cb;">
                         <div style="color: #721c24;"><strong>❌ Submission Error</strong></div>
                         <div>Error: ${error.message}</div>
+                        <div style="margin-top: 0.5rem; font-size: 0.9rem;">Please try again or refresh the page.</div>
                     </div>
                 `;
             }
