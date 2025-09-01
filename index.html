@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Official Slug Purity Test - UCSC</title>
+    <!-- Add Supabase client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Add config -->
+    <script src="config.js"></script>
     <style>
         body {
             font-family: Georgia, serif;
@@ -705,15 +709,24 @@
     </div>
 
     <script>
+        // Supabase configuration from config file
+        const SUPABASE_URL = window.SUPABASE_CONFIG.url;
+        const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.anonKey;
+        
+        // Initialize Supabase client
+        const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         function calculateScore() {
             const form = document.getElementById('purityForm');
             const checkboxes = form.querySelectorAll('input[type="checkbox"]');
             const totalQuestions = checkboxes.length;
             let checkedCount = 0;
+            const answers = {};
 
             checkboxes.forEach((checkbox) => {
                 if (checkbox.checked) {
                     checkedCount++;
+                    answers[checkbox.id] = true;
                 }
             });
 
@@ -734,11 +747,45 @@
                 message = "Yikes. You know there are student resources for help, right?";
             }
             
-            return { purityScore, message, checkedCount, totalQuestions };
+            return { purityScore, message, checkedCount, totalQuestions, answers };
         }
 
-        function calculateAndShowScore() {
+        async function saveResultToDatabase(result) {
+            if (!supabase) {
+                console.warn('Supabase not configured');
+                return;
+            }
+
+            try {
+                const { data, error } = await supabase
+                    .from('purity_test_results')
+                    .insert([
+                        {
+                            score: result.purityScore,
+                            checked_count: result.checkedCount,
+                            total_questions: result.totalQuestions,
+                            message: result.message,
+                            answers: result.answers,
+                            user_agent: navigator.userAgent
+                        }
+                    ]);
+
+                if (error) {
+                    console.error('Error saving to database:', error);
+                } else {
+                    console.log('Results saved successfully');
+                }
+            } catch (err) {
+                console.error('Database save failed:', err);
+            }
+        }
+
+        async function calculateAndShowScore() {
             const result = calculateScore();
+            
+            // Save to database (non-blocking)
+            saveResultToDatabase(result);
+            
             const scoreElement = document.getElementById('scoreResult');
             
             scoreElement.innerHTML = `
