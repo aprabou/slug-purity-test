@@ -1,7 +1,5 @@
 import sqlite3
 import os
-import tempfile
-import shutil
 from flask import Flask, render_template, request, jsonify
 from flask_cors import CORS
 from datetime import datetime
@@ -9,60 +7,11 @@ from datetime import datetime
 app = Flask(__name__)
 CORS(app)
 
-# Lambda-compatible database setup
-def get_db_path():
-    # In Lambda, we need to use /tmp directory for writes
-    if os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
-        db_path = '/tmp/responses.db'
-        # Copy initial DB from package if it doesn't exist
-        if not os.path.exists(db_path):
-            init_db_lambda(db_path)
-        return db_path
-    else:
-        return 'responses.db'
-
-DATABASE = get_db_path()
-
-def init_db_lambda(db_path):
-    """Initialize database for Lambda environment"""
-    try:
-        conn = sqlite3.connect(db_path)
-        cursor = conn.cursor()
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS question_stats (
-                question_id INTEGER PRIMARY KEY,
-                yes_count INTEGER DEFAULT 0
-            )
-        ''')
-        
-        cursor.execute('''
-            CREATE TABLE IF NOT EXISTS metadata (
-                key TEXT PRIMARY KEY,
-                value INTEGER DEFAULT 0
-            )
-        ''')
-        
-        # Initialize question stats (1-100)
-        for i in range(1, 101):
-            cursor.execute('INSERT OR IGNORE INTO question_stats (question_id, yes_count) VALUES (?, 0)', (i,))
-        
-        # Initialize total submissions counter
-        cursor.execute('INSERT OR IGNORE INTO metadata (key, value) VALUES (?, ?)', ('total_submissions', 0))
-        
-        conn.commit()
-        conn.close()
-        print("Lambda database initialized successfully")
-        return True
-    except Exception as e:
-        print(f"Lambda database initialization error: {e}")
-        return False
+# Simple database setup for App Platform
+DATABASE = 'responses.db'
 
 def init_db():
-    """Initialize database for local development"""
-    if os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
-        return True  # Skip for Lambda, handled in get_db_path()
-    
+    """Initialize database"""
     try:
         conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
@@ -116,8 +65,7 @@ def submit_responses():
         print(f"Total checked questions: {len(checked_questions)}")
         
         # Update database
-        db_path = get_db_path()
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         
         # Update question counts
@@ -132,8 +80,6 @@ def submit_responses():
         conn.close()
         
         print("Database updated successfully")
-        
-        # Return success response for AJAX (no redirect)
         return {"status": "success"}, 200
     
     except Exception as e:
@@ -143,8 +89,7 @@ def submit_responses():
 @app.route('/results')
 def results():
     try:
-        db_path = get_db_path()
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         
         # Get all question stats
@@ -168,8 +113,7 @@ def results():
 @app.route('/api/results')
 def api_results():
     try:
-        db_path = get_db_path()
-        conn = sqlite3.connect(db_path)
+        conn = sqlite3.connect(DATABASE)
         cursor = conn.cursor()
         
         # Get all question stats
@@ -194,10 +138,9 @@ def api_results():
         print(f"Error getting API results: {e}")
         return {"error": str(e)}, 500
 
-# Initialize database when app starts (local development only)
-if not os.environ.get('AWS_LAMBDA_FUNCTION_NAME'):
-    init_db()
+# Initialize database when app starts
+init_db()
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))
-    app.run(debug=True, host='0.0.0.0', port=port)
+    port = int(os.environ.get('PORT', 8080))
+    app.run(debug=False, host='0.0.0.0', port=port)
