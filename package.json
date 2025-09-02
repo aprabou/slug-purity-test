@@ -3,8 +3,5 @@
   "version": "1.0.0",
   "scripts": {
     "build": "node build.js"
-  },
-  "devDependencies": {
-    "fs": "^0.0.1-security"
   }
 }
