@@ -7,7 +7,6 @@
     <!-- Add Supabase client -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <!-- Add config -->
-    <script src="config.js"></script>
     <style>
         body {
             font-family: Georgia, serif;
@@ -711,8 +710,9 @@
     <script>
         // Supabase configuration from .env file
         // Use values from config.js
-        const SUPABASE_URL = window.SUPABASE_URL;
-        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
+        const SUPABASE_URL = 'https://fpbybafkpsyfhpepwccf.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZwYnliYWZrcHN5ZmhwZXB3Y2NmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3Njg2MTUsImV4cCI6MjA3MjM0NDYxNX0.aM6rkRjzBqaeR934GyEhgIzXvXOxnJQHiDvWH64p7jo';
+
         
         // Initialize Supabase client
         const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
