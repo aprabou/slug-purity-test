@@ -709,9 +709,10 @@
     </div>
 
     <script>
-        // Supabase configuration from config file
-        const SUPABASE_URL = window.SUPABASE_CONFIG.dbUrl;
-        const SUPABASE_ANON_KEY = window.SUPABASE_CONFIG.anonKey;
+        // Supabase configuration from .env file
+        // Use values from config.js
+        const SUPABASE_URL = window.SUPABASE_URL;
+        const SUPABASE_ANON_KEY = window.SUPABASE_ANON_KEY;
         
         // Initialize Supabase client
         const supabase = window.supabase?.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
