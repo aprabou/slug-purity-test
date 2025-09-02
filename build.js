@@ -3,7 +3,7 @@ const fs = require('fs');
 // Create the config file with environment variables
 const configContent = `// Supabase configuration
 window.SUPABASE_CONFIG = {
-    url: '${process.env.SUPABASE_URL || ''}',
+    dbUrl: '${process.env.SUPABASE_URL || ''}',
     anonKey: '${process.env.SUPABASE_ANON_KEY || ''}'
 };`;
 
